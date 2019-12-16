@@ -2525,3 +2525,9 @@ export enum ColorThemeKind {
 }
 
 //#endregion Theming
+
+
+@es5ClassCompat
+export class TimelineItem implements vscode.TimelineItem {
+	constructor(public label: string, public date: Date, public source: string) { }
+}

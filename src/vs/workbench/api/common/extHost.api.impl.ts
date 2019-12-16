@@ -727,6 +727,13 @@ export function createApiFactoryAndRegisterActors(accessor: ServicesAccessor): I
 			openTunnel: (forward: vscode.TunnelOptions) => {
 				checkProposedApiEnabled(extension);
 				return extHostTunnelService.openTunnel(forward);
+			},
+			registerTimelineProvider: (scheme: string, provider: vscode.TimelineProvider) => {
+				checkProposedApiEnabled(extension);
+				// TODO
+				return {
+					dispose: () => { }
+				};
 			}
 		};
 
@@ -946,7 +953,8 @@ export function createApiFactoryAndRegisterActors(accessor: ServicesAccessor): I
 			Decoration: extHostTypes.Decoration,
 			WebviewContentState: extHostTypes.WebviewContentState,
 			UIKind: UIKind,
-			ColorThemeKind: extHostTypes.ColorThemeKind
+			ColorThemeKind: extHostTypes.ColorThemeKind,
+			TimelineItem: extHostTypes.TimelineItem
 		};
 	};
 }

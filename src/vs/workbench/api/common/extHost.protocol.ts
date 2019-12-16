@@ -49,6 +49,7 @@ import { SaveReason } from 'vs/workbench/common/editor';
 import { ExtensionActivationReason } from 'vs/workbench/api/common/extHostExtensionActivator';
 import { TunnelDto } from 'vs/workbench/api/common/extHostTunnelService';
 import { TunnelOptions } from 'vs/platform/remote/common/tunnel';
+import { TimelineItem, TimelineProvider } from 'vs/workbench/contrib/timeline/common/timeline';
 
 export interface IEnvironment {
 	isExtensionDevelopmentDebug: boolean;
@@ -780,6 +781,13 @@ export interface MainThreadTunnelServiceShape extends IDisposable {
 	$setTunnelProvider(): Promise<void>;
 }
 
+export interface MainThreadTimelineServiceShape extends IDisposable {
+	$registerTimelineProvider(handle: number, provider: TimelineProvider): void;
+	$unregisterTimelineProvider(handle: number): void;
+
+	$getTimeline(resource: URI, since: Date, token: CancellationToken): Promise<TimelineItem[]>;
+}
+
 // -- extension host
 
 export interface ExtHostCommandsShape {
@@ -1408,6 +1416,10 @@ export interface ExtHostTunnelServiceShape {
 	$closeTunnel(remote: { host: string, port: number }): Promise<void>;
 }
 
+export interface ExtHostTimelineServiceShape {
+	// TODO[ECA]
+}
+
 // --- proxy identifiers
 
 export const MainContext = {
@@ -1450,7 +1462,8 @@ export const MainContext = {
 	MainThreadWindow: createMainId<MainThreadWindowShape>('MainThreadWindow'),
 	MainThreadLabelService: createMainId<MainThreadLabelServiceShape>('MainThreadLabelService'),
 	MainThreadTheming: createMainId<MainThreadThemingShape>('MainThreadTheming'),
-	MainThreadTunnelService: createMainId<MainThreadTunnelServiceShape>('MainThreadTunnelService')
+	MainThreadTunnelService: createMainId<MainThreadTunnelServiceShape>('MainThreadTunnelService'),
+	MainThreadTimelineService: createMainId<MainThreadTimelineServiceShape>('MainThreadTimelineService')
 };
 
 export const ExtHostContext = {
@@ -1486,5 +1499,6 @@ export const ExtHostContext = {
 	ExtHostOutputService: createMainId<ExtHostOutputServiceShape>('ExtHostOutputService'),
 	ExtHostLabelService: createMainId<ExtHostLabelServiceShape>('ExtHostLabelService'),
 	ExtHostTheming: createMainId<ExtHostThemingShape>('ExtHostTheming'),
-	ExtHostTunnelService: createMainId<ExtHostTunnelServiceShape>('ExtHostTunnelService')
+	ExtHostTunnelService: createMainId<ExtHostTunnelServiceShape>('ExtHostTunnelService'),
+	ExtHostTimelineService: createMainId<ExtHostTimelineServiceShape>('ExtHostTimelineService')
 };
