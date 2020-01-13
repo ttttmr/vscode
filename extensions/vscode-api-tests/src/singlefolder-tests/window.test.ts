@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { workspace, window, commands, ViewColumn, TextEditorViewColumnChangeEvent, Uri, Selection, Position, CancellationTokenSource, TextEditorSelectionChangeKind } from 'vscode';
 import { join } from 'path';
-import { closeAllEditors, pathEquals, createRandomFile } from '../utils';
+import { closeAllEditors, pathEquals, createRandomFile, delay } from '../utils';
 
 suite('window namespace tests', () => {
 
@@ -145,11 +145,11 @@ suite('window namespace tests', () => {
 		});
 	});
 
-	test.skip('active editor not always correct... #49125', async function () {
+	test('active editor not always correct... #49125', async function () {
 		const randomFile1 = await createRandomFile();
 		const randomFile2 = await createRandomFile();
 
-		console.log('Created random files: ' + randomFile1.toString() + ' and ' + randomFile2.toString());
+		console.log(`Created random files: ${randomFile1.toString()} and ${randomFile2.toString()}`);
 
 		const [docA, docB] = await Promise.all([
 			workspace.openTextDocument(randomFile1),
@@ -157,11 +157,19 @@ suite('window namespace tests', () => {
 		]);
 		for (let c = 0; c < 4; c++) {
 			let editorA = await window.showTextDocument(docA, ViewColumn.One);
-			console.log('Showing: ' + editorA.document.fileName + ' and active editor is: ' + window.activeTextEditor?.document.fileName);
+			console.log(`showTextDocument(): ${editorA.document.fileName} and active editor is: ${window.activeTextEditor?.document.fileName}`);
+			if (window.activeTextEditor !== editorA) {
+				console.log(`Adding 100ms delay because editors are not equal`);
+				await delay(100);
+			}
 			assert.equal(window.activeTextEditor, editorA);
 
 			let editorB = await window.showTextDocument(docB, ViewColumn.Two);
-			console.log('Showing: ' + editorB.document.fileName + ' and active editor is: ' + window.activeTextEditor?.document.fileName);
+			console.log(`showTextDocument(): ${editorB.document.fileName} and active editor is: ${window.activeTextEditor?.document.fileName}`);
+			if (window.activeTextEditor !== editorB) {
+				console.log(`Adding 100ms delay because editors are not equal`);
+				await delay(100);
+			}
 			assert.equal(window.activeTextEditor, editorB);
 		}
 	});
