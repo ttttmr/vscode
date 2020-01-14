@@ -111,17 +111,7 @@ steps:
     INTEGRATION_TEST_ELECTRON_PATH="$APP_ROOT/$APP_NAME/Contents/MacOS/Electron" \
     VSCODE_REMOTE_SERVER_PATH="$(agent.builddirectory)/vscode-reh-darwin" \
     ./scripts/test-integration.sh --build --tfs "Integration Tests"
-  displayName: Run integration tests (against build)
-  condition: and(succeeded(), eq(variables['VSCODE_STEP_ON_IT'], 'false'))
-
-- script: |
-    set -e
-    APP_ROOT=$(agent.builddirectory)/VSCode-darwin
-    APP_NAME="`ls $APP_ROOT | head -n 1`"
-    INTEGRATION_TEST_ELECTRON_PATH= \
-    VSCODE_REMOTE_SERVER_PATH= \
-    ./scripts/test-integration.sh
-  displayName: Run integration tests (out of sources)
+  displayName: Run integration tests
   condition: and(succeeded(), eq(variables['VSCODE_STEP_ON_IT'], 'false'))
 
 # Web Smoke Tests disabled due to https://github.com/microsoft/vscode/issues/80308

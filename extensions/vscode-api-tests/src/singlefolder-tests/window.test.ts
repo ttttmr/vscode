@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { workspace, window, commands, ViewColumn, TextEditorViewColumnChangeEvent, Uri, Selection, Position, CancellationTokenSource, TextEditorSelectionChangeKind } from 'vscode';
 import { join } from 'path';
-import { closeAllEditors, pathEquals, createRandomFile, delay } from '../utils';
+import { closeAllEditors, pathEquals, createRandomFile } from '../utils';
 
 suite('window namespace tests', () => {
 
@@ -146,35 +146,6 @@ suite('window namespace tests', () => {
 	});
 
 	test('active editor not always correct... #49125', async function () {
-		const randomFile1 = await createRandomFile();
-		const randomFile2 = await createRandomFile();
-
-		console.log(`Created random files: ${randomFile1.toString()} and ${randomFile2.toString()}`);
-
-		const [docA, docB] = await Promise.all([
-			workspace.openTextDocument(randomFile1),
-			workspace.openTextDocument(randomFile2)
-		]);
-		for (let c = 0; c < 4; c++) {
-			let editorA = await window.showTextDocument(docA, ViewColumn.One);
-			console.log(`showTextDocument(): ${editorA.document.fileName} and active editor is: ${window.activeTextEditor?.document.fileName}`);
-			if (window.activeTextEditor !== editorA) {
-				console.log(`Adding 100ms delay because editors are not equal`);
-				await delay(100);
-			}
-			assert(window.activeTextEditor === editorA);
-
-			let editorB = await window.showTextDocument(docB, ViewColumn.Two);
-			console.log(`showTextDocument(): ${editorB.document.fileName} and active editor is: ${window.activeTextEditor?.document.fileName}`);
-			if (window.activeTextEditor !== editorB) {
-				console.log(`Adding 100ms delay because editors are not equal`);
-				await delay(100);
-			}
-			assert(window.activeTextEditor === editorB);
-		}
-	});
-
-	test('variant1 active editor not always correct... #49125', async function () {
 		const [docA, docB] = await Promise.all([
 			workspace.openTextDocument(await createRandomFile()),
 			workspace.openTextDocument(await createRandomFile()),
@@ -184,32 +155,6 @@ suite('window namespace tests', () => {
 			assert(window.activeTextEditor === editorA);
 
 			let editorB = await window.showTextDocument(docB, ViewColumn.Two);
-			assert(window.activeTextEditor === editorB);
-		}
-	});
-
-	test('variant2 active editor not always correct... #49125', async function () {
-		const docA = await workspace.openTextDocument(await createRandomFile());
-		const docB = await workspace.openTextDocument(await createRandomFile());
-		for (let c = 0; c < 4; c++) {
-			let editorA = await window.showTextDocument(docA, ViewColumn.One);
-			assert(window.activeTextEditor === editorA);
-
-			let editorB = await window.showTextDocument(docB, ViewColumn.Two);
-			assert(window.activeTextEditor === editorB);
-		}
-	});
-
-	test('variant3 active editor not always correct... #49125', async function () {
-		const docA = await workspace.openTextDocument(await createRandomFile());
-		const docB = await workspace.openTextDocument(await createRandomFile());
-		for (let c = 0; c < 4; c++) {
-			let editorA = await window.showTextDocument(docA, ViewColumn.One);
-			editorA = await window.showTextDocument(docA, ViewColumn.One);
-			assert(window.activeTextEditor === editorA);
-
-			let editorB = await window.showTextDocument(docB, ViewColumn.Two);
-			await window.showTextDocument(docB, ViewColumn.Two);
 			assert(window.activeTextEditor === editorB);
 		}
 	});
