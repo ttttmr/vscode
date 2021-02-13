@@ -64,29 +64,25 @@ declare module 'vscode' {
 		readonly onDidChangeSessions: Event<AuthenticationProviderAuthenticationSessionsChangeEvent>;
 
 		/**
-		 * Returns an array of current sessions.
-		 *
-		 * TODO @RMacfarlane finish deprecating this and remove it
+		 * Get a list of sessions.
+		 * @param scopes An optional list of scopes. If provided, the sessions returned should match
+		 * these permissions, otherwise all sessions should be returned.
+		 * @returns A promise that resolves to an array of authentication sessions.
 		 */
 		// eslint-disable-next-line vscode-dts-provider-naming
-		getAllSessions(): Thenable<ReadonlyArray<AuthenticationSession>>;
-
-
-		/**
-		 * Returns an array of current sessions.
-		 */
-		// eslint-disable-next-line vscode-dts-provider-naming
-		getSessions(scopes: string[]): Thenable<ReadonlyArray<AuthenticationSession>>;
+		getSessions(scopes?: string[]): Thenable<ReadonlyArray<AuthenticationSession>>;
 
 		/**
 		 * Prompts a user to login.
+		 * @param scopes A list of scopes, permissions, that the new session should be created with.
+		 * @returns A promise that resolves to an authentication session.
 		 */
 		// eslint-disable-next-line vscode-dts-provider-naming
 		createSession(scopes: string[]): Thenable<AuthenticationSession>;
 
 		/**
 		 * Removes the session corresponding to session id.
-		 * @param sessionId The session id to log out of
+		 * @param sessionId The id of the session to remove.
 		 */
 		// eslint-disable-next-line vscode-dts-provider-naming
 		removeSession(sessionId: string): Thenable<void>;
@@ -1000,7 +996,7 @@ declare module 'vscode' {
 
 	//#region https://github.com/microsoft/vscode/issues/106744, Notebooks (misc)
 
-	export enum CellKind {
+	export enum NotebookCellKind {
 		Markdown = 1,
 		Code = 2
 	}
@@ -1052,7 +1048,7 @@ declare module 'vscode' {
 		readonly index: number;
 		readonly notebook: NotebookDocument;
 		readonly uri: Uri;
-		readonly cellKind: CellKind;
+		readonly cellKind: NotebookCellKind;
 		readonly document: TextDocument;
 		readonly language: string;
 		readonly outputs: readonly NotebookCellOutput[];
@@ -1089,11 +1085,6 @@ declare module 'vscode' {
 		 * When false, insecure outputs like HTML, JavaScript, SVG will not be rendered.
 		 */
 		trusted?: boolean;
-
-		/**
-		 * Languages the document supports
-		 */
-		languages?: string[];
 	}
 
 	export interface NotebookDocumentContentOptions {
@@ -1114,15 +1105,12 @@ declare module 'vscode' {
 		readonly uri: Uri;
 		readonly version: number;
 		readonly fileName: string;
+		// todo@API should we really expose this?
 		readonly viewType: string;
 		readonly isDirty: boolean;
 		readonly isUntitled: boolean;
 		readonly cells: ReadonlyArray<NotebookCell>;
 		readonly contentOptions: NotebookDocumentContentOptions;
-		// todo@API
-		// - move to kernel -> control runnable state of a cell
-		// - remove from this type
-		languages: string[];
 		readonly metadata: NotebookDocumentMetadata;
 	}
 
@@ -1257,7 +1245,7 @@ declare module 'vscode' {
 
 	// todo@API support ids https://github.com/jupyter/enhancement-proposals/blob/master/62-cell-id/cell-id.md
 	export interface NotebookCellData {
-		readonly cellKind: CellKind;
+		readonly cellKind: NotebookCellKind;
 		readonly source: string;
 		readonly language: string;
 		// todo@API maybe use a separate data type?
@@ -1267,7 +1255,6 @@ declare module 'vscode' {
 
 	export interface NotebookData {
 		readonly cells: NotebookCellData[];
-		readonly languages: string[];
 		readonly metadata: NotebookDocumentMetadata;
 	}
 
@@ -1319,6 +1306,8 @@ declare module 'vscode' {
 
 	export namespace notebook {
 
+		// todo@API should we really support to pass the viewType? We do NOT support
+		// to open the same file with different viewTypes at the same time
 		export function openNotebookDocument(uri: Uri, viewType?: string): Thenable<NotebookDocument>;
 		export const onDidOpenNotebookDocument: Event<NotebookDocument>;
 		export const onDidCloseNotebookDocument: Event<NotebookDocument>;
@@ -1344,6 +1333,7 @@ declare module 'vscode' {
 		export const onDidChangeActiveNotebookEditor: Event<NotebookEditor | undefined>;
 		export const onDidChangeNotebookEditorSelection: Event<NotebookEditorSelectionChangeEvent>;
 		export const onDidChangeNotebookEditorVisibleRanges: Event<NotebookEditorVisibleRangesChangeEvent>;
+		// TODO@API add overload for just a URI
 		export function showNotebookDocument(document: NotebookDocument, options?: NotebookDocumentShowOptions): Thenable<NotebookEditor>;
 	}
 
@@ -1592,10 +1582,13 @@ declare module 'vscode' {
 		isPreferred?: boolean;
 		preloads?: Uri[];
 
-		// todo@API
-		// languages supported by kernel
-		// first is preferred
-		// languages: string[];
+		// TODO@API control runnable state of cell
+		/**
+		 * languages supported by kernel
+		 * - first is preferred
+		 * - `undefined` means all languages available in the editor
+		 */
+		supportedLanguages?: string[];
 
 		// @roblourens
 		// todo@API change to `executeCells(document: NotebookDocument, cells: NotebookCellRange[], context:{isWholeNotebooke: boolean}, token: CancelationToken): void;`
